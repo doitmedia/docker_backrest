@@ -1,0 +1,80 @@
+version: "3.8"
+
+networks:
+  dim_network_traefik:
+    external: true
+
+volumes:
+  backrest_data:
+  backrest_cache:
+
+services:
+  backrest:
+    image: garethgeorge/backrest:latest
+    container_name: backrest
+    hostname: backrest
+    environment:
+      # Backrest Configuration
+      BACKREST_DATA: /data
+      BACKREST_CONFIG: /config/config.json
+
+      # Restic Cache Location
+      XDG_CACHE_HOME: /cache
+
+      # Timezone
+      TZ: ${TZ:-Europe/Berlin}
+
+      # Optional: Set backup schedule timezone
+      BACKUP_TZ: ${BACKUP_TZ:-Europe/Berlin}
+
+    volumes:
+      # Backrest data and config
+      - backrest_data:/data
+      - backrest_cache:/cache
+
+      # Mount backup sources - adjust these to your needs
+      # Example: Backup Docker volumes and configurations
+      - /opt:/backup-sources/opt:ro
+      - /var/lib/docker/volumes:/backup-sources/docker-volumes:ro
+
+      # Mount backup destination (local storage)
+      # Remove this if using remote storage (S3, B2, etc.)
+      - ${BACKUP_STORAGE_PATH:-/mnt/backups}:/backups
+
+      # Optional: Mount SSH keys for remote backups
+      # - ~/.ssh:/root/.ssh:ro
+
+    restart: unless-stopped
+    networks:
+      - dim_network_traefik
+
+    # Run as root to access Docker volumes
+    # user: "0:0"
+
+    labels:
+      - traefik.enable=true
+
+      # HTTP (redirects to HTTPS)
+      - traefik.http.routers.backrest-http.entrypoints=web
+      - traefik.http.routers.backrest-http.rule=Host(`${BACKREST_DOMAIN:-backrest.do-it.media}`)
+      - traefik.http.routers.backrest-http.middlewares=backrest-redirect
+      - traefik.http.middlewares.backrest-redirect.redirectscheme.scheme=https
+
+      # HTTPS
+      - traefik.http.routers.backrest-https.entrypoints=websecure
+      - traefik.http.routers.backrest-https.rule=Host(`${BACKREST_DOMAIN:-backrest.do-it.media}`)
+      - traefik.http.routers.backrest-https.tls=true
+      - traefik.http.routers.backrest-https.tls.certresolver=le
+      - traefik.http.routers.backrest-https.service=backrest-service
+      - traefik.http.services.backrest-service.loadbalancer.server.port=9898
+
+      # Security Headers
+      - traefik.http.middlewares.backrest-security.headers.sslredirect=true
+      - traefik.http.middlewares.backrest-security.headers.stsSeconds=31536000
+      - traefik.http.middlewares.backrest-security.headers.stsIncludeSubdomains=true
+      - traefik.http.middlewares.backrest-security.headers.stsPreload=true
+      - traefik.http.routers.backrest-https.middlewares=backrest-security
+
+      # Optional: Basic Auth (uncomment and configure if needed)
+      # - traefik.http.middlewares.backrest-auth.basicauth.users=${BACKREST_AUTH_USER:-admin:$$apr1$$hashed$$password}
+      # - traefik.http.routers.backrest-https.middlewares=backrest-security,backrest-auth

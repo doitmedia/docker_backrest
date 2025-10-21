@@ -1,0 +1,152 @@
+# Backrest - Git Ignore File
+
+# ============================================
+# Sensitive Configuration Files
+# ============================================
+.env
+.env.*
+!.env.example
+config.json
+secrets/
+
+# ============================================
+# Backup Data and Repositories
+# ============================================
+backups/
+backup/
+data/
+cache/
+repositories/
+restic-cache/
+
+# ============================================
+# Restic Specific
+# ============================================
+*.restic
+restic-repo/
+snapshots/
+
+# ============================================
+# Keys and Credentials
+# ============================================
+*.key
+*.pem
+*.crt
+*.cert
+*.p12
+*.pfx
+keys/
+credentials/
+*.json
+!package.json
+!config.example.json
+
+# ============================================
+# Cloud Storage Credentials
+# ============================================
+.aws/
+.b2/
+.gcs/
+.azure/
+service-account*.json
+
+# ============================================
+# SSH Keys (for remote backups)
+# ============================================
+.ssh/
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+known_hosts
+
+# ============================================
+# Backup Files
+# ============================================
+*.tar.gz
+*.zip
+*.bak
+*.backup
+*.tar
+*.tgz
+
+# ============================================
+# Log Files
+# ============================================
+*.log
+logs/
+log/
+*.log.*
+backrest.log
+
+# ============================================
+# Temporary Files
+# ============================================
+*.tmp
+*.temp
+*.swp
+*.swo
+*.swn
+*~
+tmp/
+temp/
+
+# ============================================
+# IDE and Editor Files
+# ============================================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.project
+.settings/
+.classpath
+*.iml
+
+# ============================================
+# OS Generated Files
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ============================================
+# Docker Override Files
+# ============================================
+docker-compose.override.yml
+docker-compose.override.yaml
+
+# ============================================
+# Database Snapshots
+# ============================================
+*.sql
+*.dump
+*.db
+*.sqlite
+*.sqlite3
+
+# ============================================
+# Backup State Files
+# ============================================
+state/
+state.json
+lock
+*.lock
+
+# ============================================
+# Test and Development Files
+# ============================================
+test/
+tests/
+*.test
+node_modules/
+venv/
+__pycache__/
+*.pyc
+*.pyo
